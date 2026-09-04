@@ -1,5 +1,5 @@
 import { client } from './httpClient';
-import type { LoginPayload, ProfileResponse, RegisterPayload, RegisterResponse, TokenResponse } from './types';
+import type { LoginPayload, ProfileResponse, RegisterPayload, RegisterResponse, TokenResponse } from './types/auth';
 
 export const authService = {
   register: (data: RegisterPayload) => client.post<RegisterResponse>('/api/auth/register/', data),

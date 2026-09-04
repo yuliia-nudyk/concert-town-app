@@ -1,15 +1,11 @@
 .organizing {
-  --badge-surface: #fe9a001f;
+  --badge-surface: var(--organizer-surface);
   --badge-color: var(--organizer-color);
 }
 
 .attending {
-  --badge-surface: #00bc7d1f;
-  --badge-color: #009867;
-
-  @include dark-theme {
-    --badge-color: #00d393;
-  }
+  --badge-surface: var(--attendee-surface);
+  --badge-color: var(--attendee-color);
 }
 
 .overlay {

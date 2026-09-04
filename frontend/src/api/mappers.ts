@@ -1,7 +1,7 @@
 //#region imports
 import type { SignUpData } from "../types/auth";
 import type { User } from "../types/user";
-import type { ProfileResponse, RegisterPayload } from "./types";
+import type { ProfileResponse, RegisterPayload } from "./types/auth";
 //#endregion
 
 export function mapProfileToUser(profile: ProfileResponse): User {

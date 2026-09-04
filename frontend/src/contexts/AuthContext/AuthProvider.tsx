@@ -15,7 +15,7 @@ import {
   mapProfileToUser,
   mapSignUpDataToRegisterRequest
 } from '../../api/mappers';
-import type { ProfileResponse } from '../../api/types';
+import type { ProfileResponse } from '../../api/types/auth';
 //#endregion
 
 type Props = {
