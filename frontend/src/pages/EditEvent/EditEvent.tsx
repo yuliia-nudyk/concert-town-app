@@ -3,30 +3,49 @@ import { useParams } from 'react-router';
 import { useEvents } from '../../contexts/EventContext';
 import type { EventFormData } from '../../types/events';
 import { EventForm } from '../../components/EventForm';
-import { EventNotFound } from '../EventPage/components/EventNotFound';
 import { EventFormLayout } from '../../components/EventFormLayout';
+import { useAuth } from '../../contexts/AuthContext';
+import { ErrorPage } from '../ErrorPage';
+import { EventNotFound } from '../EventNotFound';
 //#endregion
 
 export const EditEvent = () => {
   const { id } = useParams<{ id: string }>();
   const { events } = useEvents();
+  const { user } = useAuth();
 
-  const event = events.find(e => e.id === id);
+  const event = events.find(e => e.id === Number(id));
 
   if (!event) {
-    return <EventNotFound />;
+    return (
+      <EventNotFound />
+    );
+  }
+
+  if (event.organizerId !== user?.id) {
+    return (
+      <ErrorPage
+        type='access-denied'
+        title='Access denied'
+        subtitle={"You don't have permission to edit this event"}
+        buttonText='Back to event'
+        backTo={`/events/${event.id}`}
+      />
+    );
   }
 
   const formInitials: EventFormData = {
     title: event.title,
     description: event.description,
-    category: event.category,
+    categoryId: event.category.id,
     host: event.host,
     startsAt: event.startsAt,
     endsAt: event.endsAt,
     location: event.location,
     capacity: event.capacity,
-    price: event.price
+    registeredCount: event.registeredCount,
+    price: event.price,
+    status: event.status
   };
 
   return (
@@ -36,7 +55,7 @@ export const EditEvent = () => {
       backTo={`/events/${event.id}`}
       backLabel='Back to event'
     >
-      <EventForm eventId={id} initialValues={formInitials} />
+      <EventForm eventId={Number(id)} initialValues={formInitials} />
     </EventFormLayout>
   );
 };

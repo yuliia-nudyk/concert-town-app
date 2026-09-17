@@ -1,12 +1,13 @@
 //#region imports
-import cn from "classNames";
-import type { FC } from "react";
-import { Plus, X } from "lucide-react";
-import { useNavigate } from "react-router";
-import { HomeLink } from "../../../HomeLink";
-import { NavList } from "../NavList";
-import { Button } from "../../../Button";
-import styles from "./Sidebar.module.scss";
+import cn from 'classNames';
+import type { FC } from 'react';
+import { Plus, X } from 'lucide-react';
+import { useNavigate } from 'react-router';
+import { HomeLink } from '../../../HomeLink';
+import { NavList } from '../NavList';
+import { Button } from '../../../Button';
+import styles from './Sidebar.module.scss';
+import { useAuth } from '../../../../contexts/AuthContext';
 //#endregion
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 
 export const Sidebar: FC<Props> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   return (
     <>
@@ -44,13 +46,45 @@ export const Sidebar: FC<Props> = ({ isOpen, onClose }) => {
           <NavList onNavigate={onClose} />
         </nav>
 
-        <Button onClick={() => {
-          navigate('/events/new')
-          onClose();
-        }}>
-          <Plus size={16} />
-          Add event
-        </Button>
+        <div className={styles.actions}>
+          {!user && (
+            <>
+              <Button
+                onClick={() => {
+                  navigate('/sign-in');
+                  onClose();
+                }}
+              >
+                Sign in
+              </Button>
+              <p className={styles.hint}>
+                Sign in to attend and organize events
+              </p>
+            </>
+          )}
+
+          {user?.role === 'customer' && (
+            <>
+              <Button onClick={() => {}}>Become an organizer</Button>
+              <p className={styles.hint}>
+                Become an organizer to create and manage your own events
+              </p>
+            </>
+          )}
+
+          {user && (
+            <Button
+              onClick={() => {
+                navigate('/events/new');
+                onClose();
+              }}
+              disabled={user?.role === 'customer'}
+            >
+              <Plus size={16} />
+              Add event
+            </Button>
+          )}
+        </div>
       </aside>
     </>
   );

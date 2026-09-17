@@ -1,99 +1,59 @@
 //#region imports
 import { PageHeader } from '../../components/PageHeader';
-import { useEvents } from '../../contexts/EventContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
-import { useEventFilters } from './hooks/useEventFilters';
-import { ArrowUpDown, Search, X } from 'lucide-react';
-import { CustomSelect } from '../../components/CustomSelect';
-import { SORT_OPTIONS } from './utils/sortOptions';
 import { EventsFilterBar } from './components/EventsFilterBar';
-import { EventItem } from '../../components/EventItem';
-import { FormField } from '../../components/FormField';
+import { useEventFilters } from './hooks/useEventFilters';
+import { useAuth } from '../../contexts/AuthContext';
+import { EventsNav } from '../../components/EventsNav';
+import { EventsSearchSort } from '../../components/EventsSearchSort';
+import { EventsList } from '../../components/EventsList';
 import styles from './Events.module.scss';
 //#endregion
 
 export const Events = () => {
   usePageTitle('Events');
 
-  const { events } = useEvents();
+  const { user } = useAuth();
+
   const {
     searchQuery,
     setSearchQuery,
-    filterValues,
-    filterUpdates,
+    categorySlug,
+    setCategorySlug,
     sortBy,
     setSortBy,
-    visibleEvents,
+    events,
     hasActiveFilters,
     clearFilters,
-  } = useEventFilters(events);
+    isLoading
+  } = useEventFilters();
 
   return (
     <section className={styles.events}>
+      {user && <EventsNav />}
+
       <PageHeader
         title='Events'
-        subtitle='Manage and track all of your events.'
+        subtitle='Discover and register for upcoming events.'
       />
 
       <div className={styles.toolbar}>
-        <div className={styles.searchSortRow}>
-          <div className={styles.searchBar}>
-            <FormField
-              id='search'
-              type='text'
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder='Search events...'
-              startAdornment={<Search size={16} aria-hidden='true' />}
-              endAdornment={
-                searchQuery && (
-                  <button
-                    type='button'
-                    className={styles.clearSearchButton}
-                    onClick={() => setSearchQuery('')}
-                    aria-label='Clear search'
-                  >
-                    <X size={14} aria-hidden='true' />
-                  </button>
-                )
-              }
-            />
-          </div>
-
-          <div className={styles.sort}>
-            <CustomSelect
-              id='sort'
-              label={
-                <>
-                  <ArrowUpDown size={12} /> Sort by:
-                </>
-              }
-              value={sortBy}
-              onValueChange={setSortBy}
-              options={SORT_OPTIONS}
-            />
-          </div>
-        </div>
+        <EventsSearchSort
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          sortBy={sortBy}
+          onSortChange={setSortBy}
+        />
 
         <EventsFilterBar
-          values={filterValues}
-          updates={filterUpdates}
+          categorySlug={categorySlug}
+          setCategorySlug={setCategorySlug}
           hasActiveFilters={hasActiveFilters}
           onClearFilters={clearFilters}
         />
       </div>
 
-      <ul className={styles.eventsList}>
-        {visibleEvents.map(event => (
-          <li key={event.id} className={styles.eventListItem}>
-            <EventItem event={event} />
-          </li>
-        ))}
-      </ul>
-
-      {visibleEvents.length === 0 && (
-        <div className={styles.emptyBlock}>No events match your filters.</div>
-      )}
+      <EventsList events={events} isLoading={isLoading} />
     </section>
   );
 };

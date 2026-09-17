@@ -1,12 +1,16 @@
 //#region imports
+import cn from 'classNames';
 import type { FC } from 'react';
 import { Link } from 'react-router';
 import { CalendarDays, MapPin, Users } from 'lucide-react';
 import type { EventDetails } from '../../types/events';
-import { CATEGORY_IMAGES } from './categoriesImages';
 import { RelationBadge } from '../RelationBadge';
 import { CategoryBadge } from '../CategoryBadge';
 import { formatEventDate } from '../../utils/dateFormatters';
+import { DEFAULT_IMAGES } from './categoriesImages';
+import { useEventRelation } from '../../hooks/useEventRelation';
+import { DraftBadge } from '../DraftBadge';
+import baseStyles from './base.module.scss';
 import styles from './EventItem.module.scss';
 //#endregion
 
@@ -15,39 +19,46 @@ interface Props {
 }
 
 export const EventItem: FC<Props> = ({ event }) => {
+  const relation = useEventRelation(event);
   const date = formatEventDate(event.startsAt);
 
-  const locationText =
-    event.location === 'online' ? 'Online event' : event.location.city;
-
   return (
-    <Link to={`/events/${event.id}`} className={styles.eventItem}>
-      <div className={styles.imgWrapper}>
+    <Link
+      to={`/events/${event.id}`}
+      className={cn(baseStyles.eventItem, styles.eventItem)}
+    >
+      <div className={baseStyles.imgWrapper}>
         <img
-          src={CATEGORY_IMAGES[event.category]}
+          src={DEFAULT_IMAGES[event.category.slug]}
           alt=''
-          className={styles.eventImage}
+          className={cn(baseStyles.eventImage, styles.eventImage)}
         />
       </div>
 
-      {event.relation && (
+      {relation && (
         <div className={styles.relationBadge}>
-          <RelationBadge relation={event.relation} variant='overlay' />
+          <RelationBadge relation={relation} variant='overlay' />
         </div>
       )}
 
-      <div className={styles.eventSummary}>
-        <div className={styles.eventMeta}>
-          <CategoryBadge category={event.category} />
+      {event.status === 'draft' && (
+        <div className={styles.draftBadge}>
+          <DraftBadge />
+        </div>
+      )}
+
+      <div className={baseStyles.eventSummary}>
+        <div className={baseStyles.eventMeta}>
+          <CategoryBadge category={event.category.name} />
 
           <p className={styles.price}>
             {event.price > 0 ? `$${event.price}` : 'Free'}
           </p>
         </div>
 
-        <h2 className={styles.title}>{event.title}</h2>
+        <h2 className={cn(baseStyles.title, styles.title)}>{event.title}</h2>
 
-        <div className={styles.eventAttributes}>
+        <div className={baseStyles.eventAttributes}>
           <div className={styles.attribute}>
             <CalendarDays size={16} aria-hidden='true' />
 
@@ -57,7 +68,7 @@ export const EventItem: FC<Props> = ({ event }) => {
           <div className={styles.attribute}>
             <MapPin size={16} aria-hidden='true' />
 
-            {locationText}
+            {event.location.city}
           </div>
 
           <div className={styles.attribute}>

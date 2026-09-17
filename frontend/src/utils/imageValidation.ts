@@ -14,5 +14,3 @@ export function validateEventImage(file: File | null): string | undefined {
 
   return undefined;
 }
-
-

@@ -5,13 +5,13 @@ import { EventDetailsSection } from './components/EventDetailsSection';
 import { DateLocationSection } from './components/DateLocationSection';
 import { CapacityPricingSection } from './components/CapacityPricingSection';
 import { useEventForm } from '../../hooks/useEventForm';
-import styles from './EventForm.module.scss';
 import type { EventFormData } from '../../types/events';
 import type { FC } from 'react';
+import styles from './EventForm.module.scss';
 //#endregion
 
 interface Props {
-  eventId?: string;
+  eventId?: number;
   initialValues?: EventFormData;
 }
 
@@ -20,6 +20,7 @@ export const EventForm: FC<Props> = ({ eventId, initialValues }) => {
     eventId,
     initialValues
   );
+
   const { fieldErrors } = validation;
   const {
     isSubmitting,
@@ -37,19 +38,21 @@ export const EventForm: FC<Props> = ({ eventId, initialValues }) => {
           title: values.title,
           description: values.description,
           host: values.host,
-          category: values.category
+          categoryId: values.categoryId,
+          status: values.status
         }}
         onChange={{
           onTitleChange: onChange.setTitle,
           onDescriptionChange: onChange.setDescription,
           onHostChange: onChange.setHost,
-          onCategoryChange: onChange.setCategory
+          onCategoryChange: (value: string) => onChange.setCategoryId(+value),
+          onStatusChange: onChange.setStatus
         }}
         errors={{
           title: fieldErrors.title,
           description: fieldErrors.description,
-          host: fieldErrors.host,
-          category: fieldErrors.category
+          category: fieldErrors.category,
+          host: fieldErrors.host
         }}
       />
 
@@ -57,14 +60,12 @@ export const EventForm: FC<Props> = ({ eventId, initialValues }) => {
         values={{
           startsAt: values.startsAt,
           endsAt: values.endsAt,
-          isOnline: values.isOnline,
           city: values.city,
           venue: values.venue
         }}
         onChange={{
           onStartsAtChange: onChange.setStartsAt,
           onEndsAtChange: onChange.setEndsAt,
-          onIsOnlineChange: onChange.setIsOnline,
           onCityChange: onChange.setCity,
           onVenueChange: onChange.setVenue
         }}
@@ -101,7 +102,12 @@ export const EventForm: FC<Props> = ({ eventId, initialValues }) => {
           {secondaryLabel}
         </Button>
 
-        <Button type='submit' isLoading={isSubmitting} disabled={isSubmitting} fitContent={true}>
+        <Button
+          type='submit'
+          isLoading={isSubmitting}
+          disabled={isSubmitting}
+          fitContent={true}
+        >
           {submitLabel}
         </Button>
       </div>

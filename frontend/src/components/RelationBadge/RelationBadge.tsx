@@ -9,14 +9,16 @@ interface Props {
   variant?: 'overlay' | 'solid';
 }
 
-export const RelationBadge: FC<Props> = ({ relation, variant = 'solid' }) => (
-  <div
-    className={cn(styles.relationBadge, styles[relation], {
-      [styles.overlay]: variant === 'overlay'
-    })}
-  >
-    <span className={styles.badgeCircle} />
+export const RelationBadge: FC<Props> = ({ relation, variant = 'solid' }) => {
+  return (
+    <div
+      className={cn(styles.relationBadge, styles[relation], {
+        [styles.overlay]: variant === 'overlay'
+      })}
+    >
+      <span className={styles.badgeCircle} />
 
-    {relation}
-  </div>
-);
+      {relation}
+    </div>
+  );
+};

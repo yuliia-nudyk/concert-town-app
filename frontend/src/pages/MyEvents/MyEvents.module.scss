@@ -1,0 +1,8 @@
+.myEvents {
+  @include page-container;
+  @include fade-in-animation;
+
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}

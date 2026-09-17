@@ -1,15 +1,12 @@
 //#region imports
-import type { FC } from "react";
-import { EventFormSection } from "../EventFormSection";
-import { FormField } from "../../../FormField";
-import { Checkbox } from "../../../Checkbox";
-import styles from "./DateLocationSection.module.scss";
+import type { FC } from 'react';
+import { EventFormSection } from '../EventFormSection';
+import { FormField } from '../../../FormField';
 //#endregion
 
 interface Values {
   startsAt: string;
   endsAt: string;
-  isOnline: boolean;
   city: string;
   venue: string;
 }
@@ -17,7 +14,6 @@ interface Values {
 interface Handlers {
   onStartsAtChange: (value: string) => void;
   onEndsAtChange: (value: string) => void;
-  onIsOnlineChange: (value: boolean) => void;
   onCityChange: (value: string) => void;
   onVenueChange: (value: string) => void;
 }
@@ -61,38 +57,25 @@ export const DateLocationSection: FC<Props> = ({
         required
       />
 
-      <div className={styles.fullWidth}>
-        <Checkbox
-          id='isEventOnline'
-          label={'This is an online event'}
-          checked={values.isOnline}
-          onChange={onChange.onIsOnlineChange}
-        />
-      </div>
+      <FormField
+        label='City / Location'
+        id='city'
+        value={values.city}
+        onChange={e => onChange.onCityChange(e.target.value)}
+        errorMessage={errors.city}
+        placeholder='e.g. San Francisco, CA'
+        required
+      />
 
-      {!values.isOnline && (
-        <>
-          <FormField
-            label='City / Location'
-            id='city'
-            value={values.city}
-            onChange={e => onChange.onCityChange(e.target.value)}
-            errorMessage={errors.city}
-            placeholder='e.g. San Francisco, CA'
-            required
-          />
-
-          <FormField
-            label='Venue'
-            id='venue'
-            value={values.venue}
-            onChange={e => onChange.onVenueChange(e.target.value)}
-            errorMessage={errors.venue}
-            placeholder='e.g. Moscone Center'
-            required
-          />
-        </>
-      )}
+      <FormField
+        label='Venue'
+        id='venue'
+        value={values.venue}
+        onChange={e => onChange.onVenueChange(e.target.value)}
+        errorMessage={errors.venue}
+        placeholder='e.g. Moscone Center'
+        required
+      />
     </>
   </EventFormSection>
 );

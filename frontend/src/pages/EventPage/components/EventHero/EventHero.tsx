@@ -1,7 +1,8 @@
 //#region imports
 import type { FC } from 'react';
 import type { EventDetails } from '../../../../types/events';
-import { CATEGORY_IMAGES } from '../../../../components/EventItem/categoriesImages';
+import { DEFAULT_IMAGES } from '../../../../components/EventItem/categoriesImages';
+import baseStyles from './base.module.scss';
 import styles from './EventHero.module.scss';
 //#endregion
 
@@ -10,9 +11,9 @@ interface Props {
 }
 
 export const EventHero: FC<Props> = ({ event }) => (
-  <div className={styles.hero}>
+  <div className={baseStyles.hero}>
     <img
-      src={CATEGORY_IMAGES[event.category]}
+      src={DEFAULT_IMAGES[event.category.slug]}
       alt={event.title}
       className={styles.heroImage}
     />

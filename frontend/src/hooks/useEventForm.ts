@@ -9,41 +9,38 @@ import {
   validateStartDate
 } from '../utils/eventValidation';
 import { useEvents } from '../contexts/EventContext/useEvents';
-import type {
-  EventCategory,
-  EventFormData,
-  EventLocation
-} from '../types/events';
+import type { EventFormData, EventStatus } from '../types/events';
 import { useNotification } from '../contexts/NotificationContext';
 import { normalizeNumericInput } from '../utils/normalizeNumericInput';
+import { toDatetimeLocal, datetimeLocalToUTC } from '../utils/dateUtils';
 //#endregion
 
 export function useEventForm (
-  eventId: string | undefined,
+  eventId: number | undefined,
   initialValues: EventFormData | undefined
 ) {
-  //#region input controls
-  const isInitialOnline = initialValues?.location === 'online';
-  const initialOfflineLocation =
-    initialValues?.location && initialValues.location !== 'online'
-      ? initialValues.location
-      : undefined;
-
+  //#region input controls;
   const [title, setTitle] = useState(initialValues?.title || '');
   const [description, setDescription] = useState(
     initialValues?.description || ''
   );
   const [host, setHost] = useState(initialValues?.host || '');
-  const [category, setCategory] = useState<EventCategory | ''>(
-    initialValues?.category || 'conference'
+  const [categoryId, setCategoryId] = useState<number>(
+    initialValues?.categoryId || 0
   );
-  const [startsAt, setStartsAt] = useState(initialValues?.startsAt || '');
-  const [endsAt, setEndsAt] = useState(initialValues?.endsAt || '');
-  const [isOnline, setIsOnline] = useState(isInitialOnline);
-  const [city, setCity] = useState(initialOfflineLocation?.city ?? '');
-  const [venue, setVenue] = useState(initialOfflineLocation?.venue ?? '');
+  const [startsAt, setStartsAt] = useState(
+    toDatetimeLocal(initialValues?.startsAt || '')
+  );
+  const [endsAt, setEndsAt] = useState(
+    toDatetimeLocal(initialValues?.endsAt || '')
+  );
+  const [city, setCity] = useState(initialValues?.location.city ?? '');
+  const [venue, setVenue] = useState(initialValues?.location.venue ?? '');
   const [capacity, setCapacity] = useState(initialValues?.capacity || '100');
   const [price, setPrice] = useState(initialValues?.price || '0');
+  const [status, setStatus] = useState<EventStatus>(
+    initialValues?.status ?? 'published'
+  );
 
   const onCapacityChange = (value: string) =>
     setCapacity(normalizeNumericInput(value));
@@ -55,28 +52,28 @@ export function useEventForm (
     title,
     description,
     host,
-    category,
+    categoryId,
     startsAt,
     endsAt,
-    isOnline,
     city,
     venue,
     capacity,
-    price
+    price,
+    status
   };
 
   const onChange = {
     setTitle,
     setDescription,
     setHost,
-    setCategory,
+    setCategoryId,
     setStartsAt,
     setEndsAt,
-    setIsOnline,
     setCity,
     setVenue,
     onCapacityChange,
-    onPriceChange
+    onPriceChange,
+    setStatus
   };
   //#endregion
 
@@ -89,14 +86,12 @@ export function useEventForm (
     title: validateEventTitle(title),
     description: validateEventDescription(description),
     host: validateEventHost(host),
-    category: category === '' ? 'Please select a category' : undefined,
+    category: categoryId === 0 ? 'Category is required' : undefined,
     startsAt:
       startsAt === '' ? 'Start date is required' : validateStartDate(startsAt),
     endsAt: endsAt === '' ? 'End date is required' : dateRangeError,
-    city:
-      !isOnline && city.trim().length === 0 ? 'City is required' : undefined,
-    venue:
-      !isOnline && venue.trim().length === 0 ? 'Venue is required' : undefined,
+    city: city.trim().length === 0 ? 'City is required' : undefined,
+    venue: venue.trim().length === 0 ? 'Venue is required' : undefined,
     capacity:
       capacity === ''
         ? 'Capacity is required'
@@ -127,7 +122,8 @@ export function useEventForm (
         city: undefined,
         venue: undefined,
         capacity: undefined,
-        price: undefined
+        price: undefined,
+        image: undefined
       };
 
   const validation = { isFormValid, fieldErrors };
@@ -145,30 +141,30 @@ export function useEventForm (
     setTitle(initialValues?.title ?? '');
     setDescription(initialValues?.description ?? '');
     setHost(initialValues?.host ?? '');
-    setCategory(initialValues?.category ?? 'conference');
-    setStartsAt(initialValues?.startsAt ?? '');
-    setEndsAt(initialValues?.endsAt ?? '');
-    setIsOnline(isInitialOnline);
-    setCity(initialOfflineLocation?.city ?? '');
-    setVenue(initialOfflineLocation?.venue ?? '');
+    setCategoryId(initialValues?.categoryId ?? 0);
+    setStartsAt(toDatetimeLocal(initialValues?.startsAt || ''));
+    setEndsAt(toDatetimeLocal(initialValues?.endsAt || ''));
+    setCity(initialValues?.location?.city ?? '');
+    setVenue(initialValues?.location?.venue ?? '');
     setCapacity(initialValues?.capacity?.toString() ?? '100');
     setPrice(initialValues?.price?.toString() ?? '0');
     setHasAttemptedSubmit(false);
+    setStatus(initialValues?.status ?? 'draft');
   };
 
   const clearForm = () => {
     setTitle('');
     setDescription('');
     setHost('');
-    setCategory('conference');
+    setCategoryId(0);
     setStartsAt('');
     setEndsAt('');
-    setIsOnline(false);
     setCity('');
     setVenue('');
     setCapacity('100');
     setPrice('0');
     setHasAttemptedSubmit(false);
+    setStatus('draft');
   };
 
   const secondaryAction = isEditMode ? resetToInitial : clearForm;
@@ -184,17 +180,18 @@ export function useEventForm (
 
     setIsSubmitting(true);
 
-    const location: EventLocation = isOnline ? 'online' : { city, venue };
     const eventData: EventFormData = {
       title,
       description,
       host,
-      category: category as EventCategory,
-      startsAt,
-      endsAt,
-      location,
+      categoryId,
+      startsAt: datetimeLocalToUTC(startsAt),
+      endsAt: datetimeLocalToUTC(endsAt),
+      location: { city, venue },
       capacity: Number(capacity),
-      price: Number(price)
+      registeredCount: initialValues?.registeredCount || 0,
+      price: Number(price),
+      status
     };
 
     try {

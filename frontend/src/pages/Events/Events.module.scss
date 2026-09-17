@@ -7,6 +7,18 @@
   gap: 24px;
 }
 
+.topBar {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+
+  @include on-desktop {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: end;
+  }
+}
+
 .toolbar {
   display: flex;
   flex-direction: column;
@@ -36,18 +48,9 @@
     max-width: 350px;
   }
 }
-
-.clearSearchButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--secondary-color);
-  padding: 2px;
-
-  @include hover(color, var(--primary-color));
-}
-
 .eventsList {
+  @include fade-in-animation;
+
   display: flex;
   flex-direction: column;
   gap: 20px;

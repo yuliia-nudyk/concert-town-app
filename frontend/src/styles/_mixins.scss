@@ -39,6 +39,55 @@
   }
 }
 
+@mixin fade-in-scale-animation {
+  opacity: 0;
+  animation: fade-in-scale 0.4s ease-out forwards;
+
+  @keyframes fade-in-scale {
+    from {
+      opacity: 0;
+      transform: scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+@mixin shimmer {
+  --shimmer-gradient: linear-gradient(
+    90deg,
+    #ededed 30%,
+    #dcdcdc 50%,
+    #ededed 70%
+  );
+
+  @include dark-theme {
+    --shimmer-gradient: linear-gradient(
+      90deg,
+      #1e1f29 30%,
+      #2a2b35 50%,
+      #1e1f29 70%
+    );
+  }
+
+  background: var(--shimmer-gradient);
+
+  background-size: 400%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 100%;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
 @mixin page-container {
   padding: 32px 16px;
 

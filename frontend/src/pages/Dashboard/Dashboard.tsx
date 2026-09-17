@@ -1,5 +1,5 @@
 import { PageHeader } from '../../components/PageHeader';
-import { useAuth } from '../../contexts/AuthContext/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { usePageTitle } from '../../hooks/usePageTitle';
 import styles from './Dashboard.module.scss';
 

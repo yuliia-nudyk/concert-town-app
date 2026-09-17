@@ -1,6 +1,7 @@
 //#region imports
 import cn from 'classNames';
 import type { ButtonHTMLAttributes, ReactNode, FC } from 'react';
+import baseStyles from './base.module.scss';
 import styles from './Button.module.scss';
 //#endregion
 
@@ -21,11 +22,11 @@ export const Button: FC<Props> = ({
   ...rest
 }) => (
   <button
-    className={cn(styles.button, {
+    className={cn(baseStyles.button, styles.button, {
       [styles.loading]: isLoading,
-      [styles.fitContent]: fitContent,
+      [baseStyles.fitContent]: fitContent,
       [styles.secondary]: variant === 'secondary',
-      [styles.danger]: variant === 'danger',
+      [styles.danger]: variant === 'danger'
     })}
     {...rest}
   >

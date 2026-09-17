@@ -1,16 +1,11 @@
-import type { SortOption, LocationFilter, PriceFilter, RelationFilter } from "../types/eventFilters";
+import type { PriceFilter, RelationFilter } from "../types/eventFilters";
 
-export const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+export type SortBy = 'title' | 'price' | 'date';
+
+export const SORT_OPTIONS: { value: SortBy; label: string }[] = [
   { value: 'date', label: 'Date' },
   { value: 'price', label: 'Price' },
-  { value: 'popularity', label: 'Popularity' },
-  { value: 'alphabetical', label: 'Alphabetical' },
-];
-
-export const LOCATION_FILTER_OPTIONS: { value: LocationFilter; label: string }[] = [
-  { value: 'all', label: 'All locations' },
-  { value: 'online', label: 'Online' },
-  { value: 'offline', label: 'Offline' },
+  { value: 'title', label: 'Alphabetical' },
 ];
 
 export const PRICE_FILTER_OPTIONS: { value: PriceFilter; label: string }[] = [

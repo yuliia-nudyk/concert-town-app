@@ -10,12 +10,19 @@ import { useLocalStorage } from '../../hooks/useLocalStorage';
 import type { User } from '../../types/user';
 import type { SignInData, SignUpData } from '../../types/auth';
 import { AuthContext } from './AuthContext';
-import { authService } from '../../api/authService';
 import {
   mapProfileToUser,
   mapSignUpDataToRegisterRequest
-} from '../../api/mappers';
-import type { ProfileResponse } from '../../api/types/auth';
+} from '../../api/auth';
+import {
+  getProfile,
+  logIn,
+  logOut,
+  refreshToken,
+  registerUser,
+  type ProfileResponse
+} from '../../api/auth';
+import { setRefreshHandler } from '../../api/httpClient';
 //#endregion
 
 type Props = {
@@ -30,16 +37,37 @@ export const AuthProvider: FC<Props> = ({ children }) => {
   >(null, 'refreshToken');
   const [user, setUser] = useLocalStorage<User | null>(null, 'currentUser');
   const [isLoading, setIsLoading] = useState(true);
-
-  const { register, logIn, logOut, getProfile, refreshToken } = authService;
   //#endregion
 
   //#region session helpers
+  const loadAndSetUser = useCallback(
+    async (access: string) => {
+      const profile = await getProfile(access);
+      setUser(mapProfileToUser(profile));
+    },
+    [setUser]
+  );
+
   const clearSession = useCallback(() => {
     setUser(null);
     setToken(null);
     setRefreshTokenValue(null);
   }, [setUser, setToken, setRefreshTokenValue]);
+
+  const tryRefreshAndLoadUser = useCallback(
+    async (refreshValue: string) => {
+      try {
+        const { access, refresh } = await refreshToken(refreshValue);
+        setToken(access);
+        setRefreshTokenValue(refresh);
+
+        await loadAndSetUser(access);
+      } catch {
+        clearSession();
+      }
+    },
+    [setToken, setRefreshTokenValue, loadAndSetUser, clearSession]
+  );
   //#endregion
 
   ///#region session restoration
@@ -48,42 +76,60 @@ export const AuthProvider: FC<Props> = ({ children }) => {
 
     async function restoreSession () {
       if (!token) {
+        if (refreshTokenValue) {
+          await tryRefreshAndLoadUser(refreshTokenValue);
+        } else {
+          clearSession();
+        }
+
         setIsLoading(false);
         return;
       }
 
       try {
-        const profile = await getProfile(token);
-        setUser(mapProfileToUser(profile));
+        await loadAndSetUser(token);
       } catch {
-        if (!refreshTokenValue) {
-          clearSession();
-          setIsLoading(false);
-          return;
-        }
-
-        try {
-          const { access, refresh } = await refreshToken(refreshTokenValue);
-
-          setToken(access);
-          setRefreshTokenValue(refresh);
-
-          const profile = await getProfile(access);
-          setUser(mapProfileToUser(profile));
-        } catch {
+        if (refreshTokenValue) {
+          await tryRefreshAndLoadUser(refreshTokenValue);
+        } else {
           clearSession();
         }
       } finally {
         setIsLoading(false);
       }
     }
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    setRefreshHandler(async () => {
+      if (!refreshTokenValue) return null;
+
+      try {
+        const { access, refresh } = await refreshToken(refreshTokenValue);
+        setToken(access);
+        setRefreshTokenValue(refresh);
+        return access;
+      } catch {
+        clearSession();
+        return null;
+      }
+    });
+  }, [
+    refreshTokenValue,
+    setToken,
+    setRefreshTokenValue,
+    clearSession
+  ]);
   //#endregion
 
   //#region auth actions
-  const signUp = useCallback(async (data: SignUpData) => {
-    await register(mapSignUpDataToRegisterRequest(data));
-  }, [register]);
+  const signUp = useCallback(
+    async (data: SignUpData) => {
+      await registerUser(mapSignUpDataToRegisterRequest(data));
+    },
+    []
+  );
 
   const signIn = useCallback(
     async (data: SignInData) => {
@@ -94,7 +140,7 @@ export const AuthProvider: FC<Props> = ({ children }) => {
       const profile: ProfileResponse = await getProfile(response.access);
       setUser(mapProfileToUser(profile));
     },
-    [setToken, setRefreshTokenValue, getProfile, logIn, setUser]
+    [setToken, setRefreshTokenValue, setUser]
   );
 
   const signOut = useCallback(async () => {
@@ -103,13 +149,14 @@ export const AuthProvider: FC<Props> = ({ children }) => {
     }
 
     clearSession();
-  }, [clearSession, logOut, refreshTokenValue, token]);
+  }, [clearSession, refreshTokenValue, token]);
   //#endregion
 
   return (
     <AuthContext.Provider
       value={{
         user,
+        token,
         isAuthenticated: Boolean(user),
         isLoading,
         signUp,

@@ -58,3 +58,7 @@
     border: none;
   }
 }
+
+.errorMessage {
+  @include error-message;
+}

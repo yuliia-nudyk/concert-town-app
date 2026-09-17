@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react';
 import styles from './CustomSelect.module.scss';
 //#endregion
 
-export interface SelectOption<T extends string> {
+export interface SelectOption<T> {
   value: T;
   label: string;
 }
@@ -17,6 +17,7 @@ interface CustomSelectProps<T extends string> {
   value: T | '';
   onValueChange: (value: T) => void;
   options: SelectOption<T>[];
+  errorMessage?: string;
   disabled?: boolean;
 }
 
@@ -27,6 +28,7 @@ export const CustomSelect = <T extends string>({
   value,
   onValueChange,
   options,
+  errorMessage,
   disabled = false
 }: CustomSelectProps<T>) => (
   <div className={styles.wrapper}>
@@ -69,5 +71,7 @@ export const CustomSelect = <T extends string>({
         </Select.Content>
       </Select.Portal>
     </Select.Root>
+
+    {errorMessage && <p className={styles.errorMessage}>{errorMessage}</p>}
   </div>
 );

@@ -4,13 +4,11 @@
   align-items: center;
   justify-content: center;
 
-  height: 34px;
   padding-inline: 10px;
 
   @include text-medium;
   
   color: $button-color;
-  border-radius: 10px;
   border: 0.8px solid rgba(0, 0, 0, 0);
 
   background-color: var(--accent-color);
@@ -25,10 +23,6 @@
 
 .loading {
   opacity: 0.5;
-}
-
-.fitContent {
-  width: fit-content;
 }
 
 .secondary {

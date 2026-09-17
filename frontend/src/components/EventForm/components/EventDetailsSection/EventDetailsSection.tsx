@@ -1,26 +1,28 @@
 //#region imports
-import type { FC } from "react";
-import type { EventCategory } from "../../../../types/events";
-import { EventFormSection } from "../EventFormSection";
-import { FormField } from "../../../FormField";
-import { TextareaField } from "../../../TextareaField";
-import { CustomSelect } from "../../../CustomSelect";
-import { CATEGORIES_OPTIONS } from "./categories";
-import styles from "./EventDetailsSection.module.scss";
+import type { FC } from 'react';
+import { EventFormSection } from '../EventFormSection';
+import { FormField } from '../../../FormField';
+import { TextareaField } from '../../../TextareaField';
+import { CustomSelect } from '../../../CustomSelect';
+import styles from './EventDetailsSection.module.scss';
+import { useCategories } from '../../../../contexts/CategoriesContext/useCategories';
+import type { EventStatus } from '../../../../types/events';
 //#endregion
 
 interface EventDetailsValues {
   title: string;
   description: string;
   host: string;
-  category: EventCategory | '';
+  categoryId: number;
+  status: EventStatus;
 }
 
 interface EventDetailsHandlers {
   onTitleChange: (value: string) => void;
   onDescriptionChange: (value: string) => void;
   onHostChange: (value: string) => void;
-  onCategoryChange: (value: EventCategory) => void;
+  onCategoryChange: (value: string) => void;
+  onStatusChange: (status: EventStatus) => void;
 }
 
 interface Props {
@@ -29,8 +31,8 @@ interface Props {
   errors: {
     title?: string;
     description?: string;
-    host?: string;
     category?: string;
+    host?: string;
     image?: string;
   };
 }
@@ -40,6 +42,8 @@ export const EventDetailsSection: FC<Props> = ({
   onChange,
   errors
 }) => {
+  const { categories, isLoading: categoriesLoading } = useCategories();
+
   return (
     <EventFormSection title='Event details'>
       <>
@@ -68,22 +72,41 @@ export const EventDetailsSection: FC<Props> = ({
           />
         </div>
 
-        <CustomSelect
+        <div className={styles.fullWidth}>
+          <FormField
+            label='Host'
+            id='host'
+            value={values.host}
+            onChange={e => onChange.onHostChange(e.target.value)}
+            errorMessage={errors.host}
+            placeholder='Your name or organization'
+            required
+          />
+        </div>
+
+        <CustomSelect<string>
           id='category-select'
           label='Category'
-          value={values.category}
+          value={values.categoryId ? values.categoryId.toString() : ''}
           onValueChange={onChange.onCategoryChange}
-          options={CATEGORIES_OPTIONS}
+          options={categories.map(c => ({
+            value: c.id.toString(),
+            label: c.name
+          }))}
+          errorMessage={errors.category}
+          disabled={categoriesLoading}
+          placeholder='Select category'
         />
 
-        <FormField
-          label='Host'
-          id='host'
-          value={values.host}
-          onChange={e => onChange.onHostChange(e.target.value)}
-          errorMessage={errors.host}
-          placeholder='Your name or organization'
-          required
+        <CustomSelect<EventStatus>
+          id='status'
+          label='Status'
+          value={values.status}
+          onValueChange={onChange.onStatusChange}
+          options={[
+            { value: 'draft', label: 'Draft' },
+            { value: 'published', label: 'Published' }
+          ]}
         />
       </>
     </EventFormSection>

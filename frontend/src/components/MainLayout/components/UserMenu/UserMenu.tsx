@@ -2,12 +2,12 @@
 import cn from 'classNames';
 import { useState } from 'react';
 import { LogOut, User2Icon } from 'lucide-react';
-import { useAuth } from '../../../../contexts/AuthContext/useAuth';
 import { useNavigate } from 'react-router';
 import { useOutsideClick } from '../../../../hooks/useOutsideClick';
-import styles from './UserMenu.module.scss';
 import type { UserRole } from '../../../../types/user';
 import { capitalizeFirstWord } from '../../../../utils/capitalizeFirstWord';
+import { useAuth } from '../../../../contexts/AuthContext';
+import styles from './UserMenu.module.scss';
 //#endregion
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -59,7 +59,7 @@ export const UserMenu = () => {
         onClick={() => setIsUserMenuShowed(prev => !prev)}
       >
         <div className={cn(styles.avatar, styles[user.role])}>
-          {userInitials}
+          {userInitials || 'AD'}
         </div>
 
         <span className={cn(styles.triggerLabel, styles.onDesktopOnly)}>

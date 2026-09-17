@@ -8,14 +8,14 @@ export interface RegisterPayload {
   last_name: string;
 }
 
-export interface LoginPayload {
-  email: string;
-  password: string;
-}
-
 export interface RegisterResponse {
   id: number;
   email: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
 }
 
 export interface TokenResponse {
@@ -24,7 +24,7 @@ export interface TokenResponse {
 }
 
 export interface ProfileResponse  {
-  id: string;
+  id: number;
   email: string;
   first_name: string;
   last_name: string;

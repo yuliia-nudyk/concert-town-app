@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../utils/getErrorMessage';
+import { getErrorMessage } from "../../utils/getErrorMessage";
 
 const AUTH_ERROR_OVERRIDES: Record<string, string> = {
   'No active account found with the given credentials':

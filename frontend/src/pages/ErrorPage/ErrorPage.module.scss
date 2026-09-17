@@ -1,15 +1,27 @@
-.noFoundPage {
+.accessDeniedPage {
   @include page-container;
-};
+  @include fade-in-animation;
+}
 
-.noFoundBlock {
+.mainBlock {
   display: flex;
   flex-direction: column;
   align-items: center;
 
+  max-width: 500px;
+  margin: auto;
+
   padding: 48px;
   border: 0.8px dashed var(--border-color);
   border-radius: 14px;
+}
+
+.searchXIcon {
+  color: var(--accent-color);
+}
+
+.lockIcon {
+  color: var(--error-color);
 }
 
 .title {
@@ -27,4 +39,11 @@
   color: var(--secondary-color);
 
   margin-bottom: 16px;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
 }

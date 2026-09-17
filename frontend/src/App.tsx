@@ -15,44 +15,59 @@ import { NotificationContainer } from './components/NotificationContainer/Notifi
 import { EventPage } from './pages/EventPage';
 import { EditEvent } from './pages/EditEvent';
 import { EventParticipants } from './pages/EventParticipants';
-import { AuthProvider } from './contexts/AuthContext/AuthProvider';
+import { CategoriesProvider } from './contexts/CategoriesContext/CategoriesProvider';
+import { RegistrationsProvider } from './contexts/RegistrationsContext/RegistrationsProvider';
+import { AuthProvider } from './contexts/AuthContext';
+import { MyEvents } from './pages/MyEvents';
+import { MyRegistrations } from './pages/MyRegistrations';
 //#endregion
 
 function App () {
   return (
     <AuthProvider>
       <ThemeProvider>
-        <EventsProvider>
-          <NotificationProvider>
-            <HashRouter>
-              <Routes>
-                <Route path='/' element={<MainLayout />}>
-                  <Route index element={<Navigate to='/events' replace />} />
-                  <Route path='/dashboard' element={<Dashboard />} />
+        <CategoriesProvider>
+          <EventsProvider>
+            <RegistrationsProvider>
+              <NotificationProvider>
+                <HashRouter>
+                  <Routes>
+                    <Route path='/' element={<MainLayout />}>
+                      <Route
+                        index
+                        element={<Navigate to='/events' replace />}
+                      />
+                      <Route path='/dashboard' element={<Dashboard />} />
 
-                  <Route path='/events' element={<Events />} />
-                  <Route path='/events/new' element={<NewEvent />} />
-                  <Route path='/events/:id' element={<EventPage />} />
-                  <Route path='/events/:id/edit' element={<EditEvent />} />
-                  <Route
-                    path='/events/:id/participants'
-                    element={<EventParticipants />}
-                  />
+                      <Route path='/events' element={<Events />} />
+                      <Route path='/events/mine' element={<MyEvents />} />
+                      <Route
+                        path='/events/my-registrations'
+                        element={<MyRegistrations />}
+                      />
+                      <Route path='/events/new' element={<NewEvent />} />
+                      <Route path='/events/:id' element={<EventPage />} />
+                      <Route path='/events/:id/edit' element={<EditEvent />} />
+                      <Route
+                        path='/events/:id/participants'
+                        element={<EventParticipants />}
+                      />
 
-                  <Route path='/calendar' element={<Calendar />} />
-                </Route>
+                      <Route path='/calendar' element={<Calendar />} />
+                    </Route>
 
-                <Route path='/terms' element={<Terms />} />
+                    <Route path='/terms' element={<Terms />} />
 
-                <Route path='/sign-in' element={<SignIn />} />
+                    <Route path='/sign-in' element={<SignIn />} />
 
-                <Route path='/sign-up' element={<SignUp />} />
-              </Routes>
-            </HashRouter>
-
-            <NotificationContainer />
-          </NotificationProvider>
-        </EventsProvider>
+                    <Route path='/sign-up' element={<SignUp />} />
+                  </Routes>
+                </HashRouter>
+                <NotificationContainer />
+              </NotificationProvider>
+            </RegistrationsProvider>
+          </EventsProvider>
+        </CategoriesProvider>
       </ThemeProvider>
     </AuthProvider>
   );
