@@ -1,5 +1,5 @@
 //#region imports
-import { HashRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { HashRouter, Navigate, Route, Routes } from 'react-router';
 import { SignUp } from './pages/SignUp';
 import { SignIn } from './pages/SignIn';
 import { Terms } from './pages/Terms';
@@ -21,9 +21,18 @@ import { AuthProvider } from './contexts/AuthContext';
 import { MyEvents } from './pages/MyEvents';
 import { MyRegistrations } from './pages/MyRegistrations';
 import { OrganizerRequestsProvider } from './contexts/OrganizerContext/OrganizerRequestsProvider';
-import { OrganizerRequests } from './pages/OrganizerRequests';
-import { MyOrganizerRequests } from './pages/MyOrganizerRequests';
+import { OrganizerRequests, OrganizerRequestsSkeleton } from './pages/OrganizerRequests';
+import {
+  MyOrganizerRequests,
+  MyOrganizerRequestsSkeleton
+} from './pages/MyOrganizerRequests';
 import { NotFound } from './pages/NotFoundPage/NotFoundPage';
+import { RequireAccess } from './components/access/RequireAccess/RequireAccess';
+import { DashboardSkeleton } from './pages/Dashboard/DashboardSkeleton';
+import { EventsPageSkeleton } from './components/EventsPageLayout';
+import { EventFormLayoutSkeleton } from './components/layout/EventFormLayout/EventFormLayoutSkeleton';
+import { OrganizerRequiredPage } from './components/access/OrganizerRequiredPage';
+import { RequireAdmin } from './components/access/RequireAdmin/RequireAdmin';
 //#endregion
 
 function App () {
@@ -42,22 +51,94 @@ function App () {
                           index
                           element={<Navigate to='/events' replace />}
                         />
-                        <Route path='/dashboard' element={<Dashboard />} />
 
                         <Route
+                          element={
+                            <RequireAccess
+                              fallback={<DashboardSkeleton />}
+                              unauthenticatedMessage='Sign in to see an overview of your events and activity.'
+                            />
+                          }
+                        >
+                          <Route path='/dashboard' element={<Dashboard />} />
+                        </Route>
+
+                        <Route element={<RequireAdmin fallback={<OrganizerRequestsSkeleton />} />}>
+                          <Route
                           path='/organizer-requests'
                           element={<OrganizerRequests />}
                         />
+                        </Route>
 
-                        <Route path='/my-organizer-request' element={<MyOrganizerRequests />} />
+                        <Route
+                          element={
+                            <RequireAccess
+                              fallback={<MyOrganizerRequestsSkeleton />}
+                              unauthenticatedMessage='Sign in to track your organizer requests.'
+                            />
+                          }
+                        >
+                          <Route
+                            path='/my-organizer-request'
+                            element={<MyOrganizerRequests />}
+                          />
+                        </Route>
 
                         <Route path='/events' element={<Events />} />
-                        <Route path='/events/mine' element={<MyEvents />} />
+
                         <Route
-                          path='/events/my-registrations'
-                          element={<MyRegistrations />}
-                        />
-                        <Route path='/events/new' element={<NewEvent />} />
+                          element={
+                            <RequireAccess
+                              fallback={<EventsPageSkeleton />}
+                              unauthenticatedMessage='Sign in to manage and track your events.'
+                              roleRule={{
+                                role: 'organizer',
+                                content: (
+                                  <OrganizerRequiredPage forbiddenMessage='Only organizers can manage events.' />
+                                )
+                              }}
+                            />
+                          }
+                        >
+                          <Route path='/events/mine' element={<MyEvents />} />
+                        </Route>
+
+                        <Route
+                          element={
+                            <RequireAccess
+                              fallback={<EventsPageSkeleton />}
+                              unauthenticatedMessage="Sign in to see the events you're registered to attend."
+                            />
+                          }
+                        >
+                          <Route
+                            path='/events/my-registrations'
+                            element={<MyRegistrations />}
+                          />
+                        </Route>
+
+                        <Route
+                          element={
+                            <RequireAccess
+                              fallback={
+                                <EventFormLayoutSkeleton
+                                  backTo='/events'
+                                  backLabel='Back to events'
+                                />
+                              }
+                              unauthenticatedMessage='Sign in to create an event.'
+                              roleRule={{
+                                role: 'organizer',
+                                content: (
+                                  <OrganizerRequiredPage forbiddenMessage='You need to be an organizer to create an event.' />
+                                )
+                              }}
+                            />
+                          }
+                        >
+                          <Route path='/events/new' element={<NewEvent />} />
+                        </Route>
+
                         <Route path='/events/:id' element={<EventPage />} />
                         <Route
                           path='/events/:id/edit'
@@ -77,7 +158,7 @@ function App () {
 
                       <Route path='/sign-up' element={<SignUp />} />
 
-                       <Route path="*" element={<NotFound />} />
+                      <Route path='*' element={<NotFound />} />
                     </Routes>
                   </HashRouter>
                   <NotificationContainer />
