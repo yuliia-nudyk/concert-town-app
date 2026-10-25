@@ -7,17 +7,18 @@ import {
   validateEventHost,
   validateEventTitle,
   validateStartDate
-} from '../utils/eventValidation';
+} from '../utils/validation/eventValidation';
 import { useEvents } from '../contexts/EventContext/useEvents';
 import type { EventFormData, EventStatus } from '../types/events';
 import { useNotification } from '../contexts/NotificationContext';
 import { normalizeNumericInput } from '../utils/normalizeNumericInput';
-import { toDatetimeLocal } from '../utils/dateUtils';
 import {
   fromDateTimeInputValue,
   toDateTimeInputValue
-} from '../utils/dateTimeInputFormat';
+} from '../utils/date/dateTimeInputFormat';
 import { getErrorMessage } from '../utils/getErrorMessage';
+import { getChangedEventFields } from '../utils/getChangedEventFields';
+import { areDateTimesEqual } from '../utils/date/areDateTimesEqual';
 //#endregion
 
 export function useEventForm (
@@ -48,7 +49,7 @@ export function useEventForm (
   const [isOnline, setIsOnline] = useState(isInitialOnline);
   const [city, setCity] = useState(initialOfflineLocation?.city ?? '');
   const [venue, setVenue] = useState(initialOfflineLocation?.venue ?? '');
-  const [capacity, setCapacity] = useState(initialValues?.capacity || '100');
+  const [capacity, setCapacity] = useState(initialValues?.capacity || '0');
   const [price, setPrice] = useState(initialValues?.price || '0');
   const [status, setStatus] = useState<EventStatus>(
     initialValues?.status ?? 'published'
@@ -92,8 +93,14 @@ export function useEventForm (
   //#endregion
 
   //#region validation
+  const isEditMode = Boolean(eventId);
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false);
 
+  const shouldValidateStart =
+    !isEditMode || !areDateTimesEqual(initialValues?.startsAt || '', startsAt);
+  const startDateError = shouldValidateStart
+    ? validateStartDate(startsAt)
+    : undefined;
   const dateRangeError = validateDateRange(startsAt, endsAt);
 
   const rawFieldErrors = {
@@ -101,8 +108,7 @@ export function useEventForm (
     description: validateEventDescription(description),
     host: validateEventHost(host),
     category: categoryId === 0 ? 'Category is required' : undefined,
-    startsAt:
-      startsAt === '' ? 'Start date is required' : validateStartDate(startsAt),
+    startsAt: startsAt === '' ? 'Start date is required' : startDateError,
     endsAt: endsAt === '' ? 'End date is required' : dateRangeError,
     city:
       !isOnline && city.trim().length === 0 ? 'City is required' : undefined,
@@ -146,7 +152,6 @@ export function useEventForm (
   //#endregion
 
   //#region submission
-  const isEditMode = Boolean(eventId);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const { addEvent, updateEvent } = useEvents();
@@ -158,15 +163,15 @@ export function useEventForm (
     setDescription(initialValues?.description ?? '');
     setHost(initialValues?.host ?? '');
     setCategoryId(initialValues?.categoryId ?? 0);
-    setStartsAt(toDatetimeLocal(initialValues?.startsAt || ''));
-    setEndsAt(toDatetimeLocal(initialValues?.endsAt || ''));
+    setStartsAt(toDateTimeInputValue(initialValues?.startsAt || ''));
+    setEndsAt(toDateTimeInputValue(initialValues?.endsAt || ''));
     setIsOnline(isInitialOnline);
     setCity(initialOfflineLocation?.city ?? '');
     setVenue(initialOfflineLocation?.venue ?? '');
-    setCapacity(initialValues?.capacity?.toString() ?? '100');
-    setPrice(initialValues?.price?.toString() ?? '0');
+    setCapacity(initialValues?.capacity ?? '0');
+    setPrice(initialValues?.price ?? '0');
     setHasAttemptedSubmit(false);
-    setStatus(initialValues?.status ?? 'draft');
+    setStatus(initialValues?.status ?? 'published');
   };
 
   const clearForm = () => {
@@ -176,12 +181,13 @@ export function useEventForm (
     setCategoryId(0);
     setStartsAt('');
     setEndsAt('');
+    setIsOnline(false);
     setCity('');
     setVenue('');
-    setCapacity('100');
+    setCapacity('0');
     setPrice('0');
     setHasAttemptedSubmit(false);
-    setStatus('draft');
+    setStatus('published');
   };
 
   const secondaryAction = isEditMode ? resetToInitial : clearForm;
@@ -204,15 +210,20 @@ export function useEventForm (
       endsAt: fromDateTimeInputValue(endsAt),
       location: isOnline ? 'online' : { city, venue },
       capacity: Number(capacity),
-      registeredCount: initialValues?.registeredCount || 0,
-      price: Number(price),
+      price: price,
       status
     };
 
     try {
-      if (isEditMode && eventId) {
-        await updateEvent(eventId, eventData);
-        showToast('Event updated successfully!', 'success');
+      if (isEditMode && initialValues && eventId) {
+        const updatedData = getChangedEventFields(initialValues, eventData);
+
+        if (Object.keys(updatedData).length === 0) {
+          showToast('No changes were made.', 'info');
+        } else {
+          await updateEvent(eventId, updatedData);
+          showToast('Event updated successfully!', 'success');
+        }
       } else {
         await addEvent(eventData);
         showToast('Event created successfully!', 'success');

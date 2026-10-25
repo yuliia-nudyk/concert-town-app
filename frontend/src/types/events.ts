@@ -17,18 +17,20 @@ export interface Category {
   slug: string;
 }
 
-export type EventStatus = 'draft' | 'published';
+export type EventStatus = 'published' | 'canceled';
+
+export type RelationFilter = 'all' | 'organizing' | 'attending';
 
 export interface EventDetails {
   id: number;
   title: string;
   description: string;
-  category: Category;
+  category: Category | null;
   startsAt: string;
   endsAt: string;
   location: EventLocation;
   capacity: number;
-  price: number;
+  price: string;
   registeredCount: number;
   host: string;
   organizerId: number;
@@ -41,10 +43,9 @@ export type EventFormData = Omit<
   EventDetails,
   | 'id'
   | 'organizerId'
-  | 'participants'
   | 'category'
   | 'isActive'
+  | 'registeredCount'
 > & {
   categoryId: number;
-  status: EventStatus;
 };

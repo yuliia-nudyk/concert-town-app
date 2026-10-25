@@ -9,8 +9,7 @@ export interface EventResponse {
   host: string;
   location: EventLocation;
   category: Category;
-  category_id: number;
-  price: number;
+  price: string;
   total_seats: number;
   available_seats: number;
   is_active: boolean;
@@ -25,11 +24,9 @@ export interface EventRequest {
   host: string;
   location: EventLocation;
   category_id: number;
-  price: number;
+  price: string;
   total_seats: number;
-  available_seats: number;
   is_active: boolean;
-  organizer_id?: string;
 }
 
 export interface ParticipantDTO {
